@@ -1,0 +1,47 @@
+{
+  "name": "Waifu",
+  "version": "0.2.0b",
+  "description": "My wife is an anime waifu",
+  "main": "app://waifu/app/views/index.html",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cuevana/storm.git"
+  },
+  "window": {
+    "title": "Waifu",
+    "toolbar": false,
+    "frame": false,
+    "width": 960,
+    "height": 645,
+    "min_width": 960,
+    "min_height": 645,
+    "resizable": true,
+    "show": false,
+    "icon": "app/assets/icons/512x512.png"
+  },
+  "scripts": {
+    "install": "gulp install",
+    "start": "./nodewebkit . -- --debug",
+    "compile": "gulp compile",
+    "watcher": "gulp watch",
+    "build": "gulp build",
+    "build-all": "gulp build --all"
+  },
+  "dependencies": {
+    "i18n": "^0.5.0",
+    "moment": "^2.8.3",
+    "numeral": "^1.5.3",
+    "peerflix": "^0.21.0",
+    "read-torrent": "^1.1.0",
+    "request": "^2.45.0",
+    "node-webkit-builder": "0.2.0"
+  },
+  "devDependencies": {
+    "gulp": "~3.8.10",
+    "gulp-inject": "~1.0.2",
+    "gulp-concat": "~2.4.1",
+    "gulp-less": "~1.3.6",
+    "gulp-exec": "^2.1.1",
+    "node-webkit-builder": "0.2.0"
+  }
+}
