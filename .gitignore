@@ -1,0 +1,14 @@
+/node_modules
+
+# Sublime Text Files
+*.sublime-*
+
+# Debugging Purposes
+*.mkv
+*.mp4
+*.srt
+
+# Build files
+/build
+nodewebkit
+.*.sw*
