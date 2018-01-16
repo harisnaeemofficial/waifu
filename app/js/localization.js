@@ -1,16 +1,14 @@
-var i18n = require("i18n");
-
-// User language
+const i18n = require("i18n");
 var userLanguage = window.navigator.language;
 
 // Available languages
-var allLanguages = ['es','en'];
+var allLanguages = ['en'];
 var defaultLanguage = 'en';
 
 i18n.configure({
-    locales: allLanguages,
-    directory: './app/locales',
-    defaultLocale: defaultLanguage
+	locales: allLanguages,
+	directory: './app/locales',
+	defaultLocale: defaultLanguage
 });
 
 // Init user language or default

@@ -1,7 +1,7 @@
-var peerflix = require('peerflix'),
-    child_process = require('child_process'),
-    numeral = require('numeral'),
-    readTorrent = require('read-torrent');
+var peerflix = require('peerflix')
+var child_process = require('child_process')
+var numeral = require('numeral')
+var readTorrent = require('read-torrent')
 
 // Minimum percentage to open video
 var MIN_PERCENTAGE_LOADED = 0.5;

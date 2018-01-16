@@ -29,7 +29,6 @@ var deltaHeight = false;
 
 
 function initWindowState() {
-    // localStorage.removeItem('windowState');
     winState = JSON.parse(localStorage.getItem('windowState') || 'null');
 
     if (winState) {
@@ -134,16 +133,6 @@ $(window).on('resize', $.debounce(500, function () {
             currWinMode = 'normal';
         }
     }
-
-    // there is no deltaHeight yet, calculate it and adjust window size
-    // if (deltaHeight === false) {
-    //     deltaHeight = win.height - winState.height;
-
-    //     // set correct size
-    //     if (deltaHeight !== 0) {
-    //         win.resizeTo(winState.width, win.height - deltaHeight);
-    //     }
-    // }
 
     dumpWindowState();
 }));

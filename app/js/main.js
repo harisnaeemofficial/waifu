@@ -1,11 +1,11 @@
-var request = require('request'),
-	http = require('http'),
-	fs = require('fs'),
-	path = require('path'),
-    os = require('os'),
-    moment = require('moment'),
-    gui = require('nw.gui');
-
+var request = require('request')
+var http = require('http')
+var fs = require('fs')
+var path = require('path')
+var os = require('os')
+var moment = require('moment')
+var gui = require('nw.gui')
+var api = new Api()
 
 // Window
 var win = gui.Window.get();
@@ -13,8 +13,6 @@ win.title = 'Waifu';
 var windows = [];
 
 // API endpoint
-//var endpoint = 'http://api.cuevana.tv';
-//var endpoint = 'http://localhost:8000';
 var endpoint = 'http://anime.waifu.ca';
 
 // App version
@@ -27,16 +25,18 @@ var isLinux = (!isWin && !isMac);
 var isMaximized = false;
 
 // App extra variables
-var videoData = {};
+var videoData = {}
+
 var languages = {
-	'ES': i18n.__('SPANISH'),
-	'LA': i18n.__('LATIN-SPANISH'),
-	'EN': i18n.__('ENGLISH'),
-	'PT': i18n.__('PORTUGUESE'),
-	'FR': i18n.__('FRENCH'),
-  'DE': i18n.__('Deutsch'),
-  'IT': i18n.__('ITALIAN')
+    'ES': i18n.__('SPANISH'),
+    'LA': i18n.__('LATIN-SPANISH'),
+    'EN': i18n.__('ENGLISH'),
+    'PT': i18n.__('PORTUGUESE'),
+    'FR': i18n.__('FRENCH'),
+    'DE': i18n.__('Deutsch'),
+    'IT': i18n.__('ITALIAN')
 }
+
 var genres = [
 	{ key: '1', name: i18n.__('GENRE_DRAMA')},
 	{ key: '2', name: i18n.__('GENRE_COMEDY')},
@@ -86,9 +86,6 @@ var isDebug = gui.App.argv.indexOf('--debug') > -1;
 if (!isDebug) {
     console.log = function () {};
 } else {
-  
-//    endpoint = 'http://localhost:8000';
-    console.log("endpoint", endpoint);
     function addDeveloperTools(win) {
       // Developer Shortcuts
       win.window.document.addEventListener('keydown', function(event){
@@ -155,13 +152,13 @@ var Storm = function() {
 		t.loadConfig();
 
 		// Toolbar in Windows
-			var toolbar = $('#toolbar');
-      toolbar.show();
-			toolbar.find('.min').click(function() { win.minimize()	});
-			toolbar.find('.max').click(function() { isMaximized ? win.unmaximize() : win.maximize() });
-			toolbar.find('.close').click(function() { win.close() });
+		var toolbar = $('#toolbar');
+  		toolbar.show();
+		toolbar.find('.min').click(function() { win.minimize()	});
+		toolbar.find('.max').click(function() { isMaximized ? win.unmaximize() : win.maximize() });
+		toolbar.find('.close').click(function() { win.close() });
 
-	if (isWin) {
+		if (isWin) {
 			$('body').addClass('isWindows');
 		} else if (isMac) {
 			$('body').addClass('isMac');
@@ -173,10 +170,7 @@ var Storm = function() {
 		t.resizeElements();
 
 		// Moment lang
-		moment.locale('es');
-
-		// Check for updates
-		t.checkUpdates();
+		// moment.locale('');
 
 		// Input search focus
 		$('#q').on('focus', function() {
@@ -348,48 +342,8 @@ var Storm = function() {
 		})
 
 		// Featured
-		t.featured = t.loadFeaturedList();
+		t.featured = t.load_season_releases();
 
-	}
-
-	t.trackPageview = function(url) {
-		if (window._gaq && !isDebug) {
-      console.log("traking");
-			_gaq.push(['_trackPageview', '/app'+url]);
-		}
-	}
-
-	t.checkUpdates = function() {
-		var url = endpoint+'/update';
-
-		var ac = t.newAjaxCallId();
-
-		request({
-			url: url,
-			method: 'GET',
-			json: true
-		}, function(error, response, data) {
-			 if (!error && response.statusCode == 200) {
-				if (data.version != window.version) {
-					$('#app-alert').show().find('button').click(function() {
-						gui.Shell.openExternal(data.download_url);
-					});
-          div_bg = $("<div>",{'class':'needupdate'});
-          $("body").append(div_bg);
-				}
-        console.log("data "+ data.banner_link);
-        $(".ads #banner").attr("src", data.banner_image);
-        $(".ads #banner_link").attr("href", data.banner_link);
-        $(".ads #banner_link").bind("click", function(e){
-          e.preventDefault();
-          var t = $(this).attr("href");
-          console.log("url click" + t);
-          gui.Shell.openExternal(t);
-        });
-			}
-			t.delAjaxCall(ac);
-		})
-		setTimeout(t.checkUpdates, 86400000);
 	}
 
 	// Resize elements
@@ -428,18 +382,6 @@ var Storm = function() {
 		localStorage.setItem('config', JSON.stringify(t.config));
 	}
 
-	// Ajax calls
-	t.newAjaxCallId = function () {
-        t.totalajaxcalls++;
-        t.ajaxcalls.push(t.totalajaxcalls);
-        return t.totalajaxcalls
-    }
-    t.delAjaxCall = function (id) {
-        var i = t.ajaxcalls.indexOf(id);
-        if (i != -1) {
-            t.ajaxcalls.splice(i, 1)
-        }
-    }
 
     // Search
     t.searchList = function(e, suggest) {
@@ -455,10 +397,13 @@ var Storm = function() {
 
     // Load view
 	t.loadView = function(type, action, id, vars, page, append, scrollcallback) {
-		
+		if(id == null) {
+			api.get_season_releases((data) => {
+				t.renderGrid(data, append)
+			})
+		}
 		// Close detail view if open
 		t.closeItemView();
-
 		// Save last URL
 		t.lastURL = {
 			type: type,
@@ -468,7 +413,6 @@ var Storm = function() {
 			page: page,
 			append: append
 		}
-
 		// Clean genre
 		if (vars == null || vars.indexOf('genre') == -1) {
 			t.setGenre('', true);
@@ -485,8 +429,8 @@ var Storm = function() {
 			vars_url += '&orderby='+t.config.orderBy.type+'&order='+t.config.orderBy.order;
 		}
 
-		t.trackPageview('/'+type+action_url+id_url+'?'+vars_url+page_url);
 		var url = endpoint+'/'+type+action_url+id_url+'?'+vars_url+page_url;
+		console.log(url)
 
 		// Set callback and time for cache
 		var callback = function(url, data) {
@@ -496,6 +440,7 @@ var Storm = function() {
     		if (id != null) {
 				t.renderItemView(data)
 			} else {
+				console.log(data)
 				t.renderGrid(data, append)
 			}
 			if (typeof scrollcallback == 'function') {
@@ -504,9 +449,8 @@ var Storm = function() {
     	}, time = 3600000;
 
     	// Load cached view data
-		if (t.isCached(url,time,callback)) return;
+		if (t.isCached(url, time, callback)) return;
 
-		var ac = t.newAjaxCallId();
 		t.loader();
 
 		t.lastRequest = url;
@@ -518,13 +462,14 @@ var Storm = function() {
 		}, function(error, response, data) {
 			 if (!error && response.statusCode == 200) {
 			 	if (url == t.lastRequest) {
+			 		console.log(url)
+			 		console.log(data)
 					callback(url, data)
 					t.saveCache(url, data);
 				}
 			} else if (error) {
 				t.ajaxError('noconnection');
 			}
-			t.delAjaxCall(ac);
 			t.loader(true)
 
 			// Hide initial loading screen if error
@@ -543,7 +488,7 @@ var Storm = function() {
 		// Clean
 		if (!append) grid.empty();
 
-		if (data == null || data == 'undefined' || data.data == 'undefined' || data.data.length == 0) {
+		if (data == null || data == 'undefined') {
 			gridcontainer.jScrollPane(scrollbarOptions);
 			return;
 		}
@@ -551,8 +496,7 @@ var Storm = function() {
 		// List series
 		if (t.lastURL.type=='series' && t.lastURL.action == '') {
 			grid.addClass('tvshowslist');
-			var input = 
-			grid.prepend()
+			var input = grid.prepend()
 		}
 
 		// OrderBy
@@ -635,59 +579,55 @@ var Storm = function() {
 	}
 
 	// Load featured list
-	t.loadFeaturedList = function() {
-		var url = endpoint+'/featured';
+	t.load_season_releases = function() {
 
 		// Set callback and time for cache
-		var callback = function(url, data) {
+		var callback = function(data) {
 			t.featured = data;
-			t.populateFeatured();
-    	}, time = 86400000;
+			t.populate_season_releases();
+    	}
+    	time = 86400000
 
     	// Load cached view data
-		if (t.isCached(url,time,callback)) return;
+		if (t.isCached('get_season_releases', time, callback)) return;
 
-		var ac = t.newAjaxCallId();
 
-		request({
-			url: url,
-			method: 'GET',
-			json: true
-		}, function(error, response, data) {
-			 if (!error && response.statusCode == 200) {
-				callback(url, data)
-				t.saveCache(url, data);
+		api.get_season_releases(function(data, error) {
+			 if (!error) {
+				callback(data)
+				t.saveCache('get_season_releases', data);
 			} else if (error) {
 				t.ajaxError('noconnection');
 			}
-			t.delAjaxCall(ac);
 		})
 	}
 
 	// Populate featured based on data
-	t.populateFeatured = function() {
+	t.populate_season_releases = function() {
 		var preview = $('#featured .preview');
 		for (var i in t.featured) {
 			var li = $('<li><span></span></li>').appendTo(preview).data('info', {
-				title: t.featured[i].title,
-				text: t.featured[i].text,
-				type: t.featured[i].type,
+				title: t.featured[i].title_romaji,
+				text: "Not implemented for the moment",
+				type: 'tvshows',
 				id: t.featured[i].id,
-				img_url : t.featured[i].img_url
+				img_url : t.featured[i].image_url_banner || t.featured[i].image_url_lge
 			})
 		}
 		preview.children('li').on('click', function() {
 			clearTimeout(t.featuredTimeout);
-			t.setFeatured(preview.children('li').index($(this)));
+			t.set_season_release(preview.children('li').index($(this)));
 		})
 		// Set initial
-		t.setFeatured(0);
+		t.set_season_release(0);
 	}
 
-	t.setFeatured = function(index) {
+	t.set_season_release = function(index) {
+
 		var preview = $('#featured .preview'), li = preview.children('li'), total = li.length-1, view = 3;
 		li.removeClass();
 		var item = li.eq(index), data = item.data('info');
+		console.log(item.data('info'))
 		item.addClass('sel');
 
 		// preview row
@@ -718,13 +658,13 @@ var Storm = function() {
 
 		t.featuredTimeout = setTimeout(function() {
 			var next = index>=total ? 0 : index;
-			t.setFeatured(next)
+			t.set_season_release(next)
 		}, 8000);
 	}
 
 	// Render featured grid
 	t.renderFeatured = function(type) {
-		type=='tvshows' ? type : 'movies';
+		type == 'tvshows' ? type : 'movies';
 		t.topButtonBar(null, 'featured');
 		t.loadView(type,'featured');
 	}
@@ -1041,7 +981,6 @@ var Storm = function() {
 		return false;
     }
 
-	// Actualiza el estilo del grid
 	t.updateViewStyle = function(style, hidegrid) {
 		var grid = $('#main .grid');
 		if (hidegrid) grid.hide();
